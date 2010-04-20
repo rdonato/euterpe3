@@ -220,7 +220,7 @@ def mainProg():
          except :
             print "Skype closed...bye bye!"  
             sys.exit(0)
-        time.sleep(90)
+         time.sleep(90)
         loop.run()
 
 
