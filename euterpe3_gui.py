@@ -30,7 +30,7 @@ class EuterpeGui(QtGui.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('web.png'))
         self.setToolTip('Press Start! to send tracks to your <b>skype</b>')
         QtGui.QToolTip.setFont(QtGui.QFont('OldEnglish', 10))
-        button_layout = QtGui.QHBoxLayout()
+        self.button_layout = QtGui.QHBoxLayout()
         self.lineEdit = QtGui.QLineEdit(self)
         pic = QtGui.QLabel(self)
         pic.setGeometry(300, 30, 80, 80)
@@ -46,23 +46,17 @@ class EuterpeGui(QtGui.QMainWindow):
         self.lineEdit.setObjectName("lineEdit")
         self.lineEdit.setMaxLength(20)
         self.lineEdit.setText(unicode('cuciniere_zen'))        
-        startButton = QtGui.QPushButton("&Start")
-        #textWidth = startButton.fontMetrics().boundingRect(button.text()).width()
-        #startButton.setMaximumWidth(textWidth+15) # I added 15 units to give the text a little breathing room
-
-        #stopButton = QtGui.QPushButton("Stop")
-       # buttonC = QtGui.QPushButton("No Thread")
-        startButton.clicked.connect(self.startDirectThread)
+        self.startButton = QtGui.QPushButton("&Start")
+        self.stopButton = QtGui.QPushButton("&Change Username")
+        self.startButton.clicked.connect(self.startDirectThread)
+        self.stopButton.clicked.connect(self.startDirectThread)
         self.proc = ConnectedThread()
         self.proc.start()
-        #startButton.clicked.connect(self.proc.readyOK)
-        #stopButton.clicked.connect(self.proc.stopNWait,type=QtCore.Qt.QueuedConnection)
-        #stopButton.clicked.connect(self.proc.stopNWait)
-        #buttonC.clicked.connect(self.sleepNoThread)
-        button_layout.addWidget(startButton)
-        #button_layout.addWidget(stopButton)       
+        self.button_layout.addWidget(self.startButton) 
+        self.button_layout.addWidget(self.stopButton)
+        self.stopButton.hide()
         layout.addWidget(self.label)
-        layout.addLayout(button_layout)
+        layout.addLayout(self.button_layout)
         widge.setLayout(layout)
         self.setCentralWidget(widge)
         
@@ -85,6 +79,12 @@ class EuterpeGui(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def xFinished(self):
         print QtCore.QThread.currentThreadId()
+        #self.startButton.setText('Started!')
+        self.startButton.hide()
+        self.stopButton.show()
+        self.lineEdit.setFocus()
+        #self.button_layout.removeWidget(self.startButton)
+        #self.button_layout.setEnabled(False)
         self.ok = True
         
     def center(self):
