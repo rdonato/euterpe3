@@ -20,12 +20,13 @@ sys.setdefaultencoding(locale.getdefaultlocale()[1])
 class EuterpeGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
+        self.ctimer = QtCore.QTimer()
         widge = QtGui.QWidget()
         layout = QtGui.QVBoxLayout()
         self.ok = True
         self.setGeometry(400, 300, 400, 250)
         self.setWindowTitle('Euterpe release 3.0')
-        self.statusBar().showMessage('Riccardo Donato')
+        self.statusBar().showMessage('Riccardo Donato info@: http://www.rdonato.net')
         self.center()
         self.setWindowIcon(QtGui.QIcon('web.png'))
         self.setToolTip('Press Start! to send tracks to your <b>skype</b>')
@@ -37,7 +38,10 @@ class EuterpeGui(QtGui.QMainWindow):
         pic.setPixmap(QtGui.QPixmap(os.getcwd() + "/web.png"))
         self.label = QtGui.QLabel(self)
         self.label2 = QtGui.QLabel(self)
+        self.label3 = QtGui.QLabel(self)
         self.label2.setGeometry(QtCore.QRect(20, 30, 90, 24))
+        self.label3.setGeometry(QtCore.QRect(20, 30, 350, 124))
+        self.label3.setText(unicode('Press start to begin!'))
         self.label2.setText(unicode('Username: '))
         self.label2.show()
         self.lineEdit.setGeometry(QtCore.QRect(95, 30, 150, 24))
@@ -50,6 +54,7 @@ class EuterpeGui(QtGui.QMainWindow):
         self.stopButton = QtGui.QPushButton("&Change Username")
         self.startButton.clicked.connect(self.startDirectThread)
         self.stopButton.clicked.connect(self.startDirectThread)
+        QtCore.QObject.connect(self.ctimer, QtCore.SIGNAL("timeout()"), self.showSong)
         self.proc = ConnectedThread()
         self.proc.start()
         self.button_layout.addWidget(self.startButton) 
@@ -60,6 +65,7 @@ class EuterpeGui(QtGui.QMainWindow):
         widge.setLayout(layout)
         self.setCentralWidget(widge)
         
+        
     @QtCore.pyqtSlot()
     def startDirectThread(self):
         if self.ok:
@@ -68,7 +74,7 @@ class EuterpeGui(QtGui.QMainWindow):
             self.x.start()
             global user,flagMood 
             user = str(self.lineEdit.text())
-            print "Username:", user
+            print "DEBUG Username:", user
             self.x.finished.connect(self.xFinished)
             
     @QtCore.pyqtSlot()
@@ -78,11 +84,12 @@ class EuterpeGui(QtGui.QMainWindow):
         
     @QtCore.pyqtSlot()
     def xFinished(self):
-        print QtCore.QThread.currentThreadId()
+        print "DEBUG ", QtCore.QThread.currentThreadId()
         #self.startButton.setText('Started!')
         self.startButton.hide()
         self.stopButton.show()
         self.lineEdit.setFocus()
+        self.ctimer.start(1000)
         #self.button_layout.removeWidget(self.startButton)
         #self.button_layout.setEnabled(False)
         self.ok = True
@@ -101,13 +108,19 @@ class EuterpeGui(QtGui.QMainWindow):
             event.accept()
         else:
             event.ignore()      
+     
+    def showSong(self):
+        if flagMood :
+            self.label3.setText(unicode('Sending: '+song))
+        else   :
+            self.label3.setText(unicode('Your player is paused!!')) 
         
         
 class DirectThread(QtCore.QThread):
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self,parent)
     def run(self):
-        print QtCore.QThread.currentThreadId()
+        print "DEBUG ", QtCore.QThread.currentThreadId()
 
         
 class ConnectedThread(QtCore.QThread):
@@ -121,10 +134,10 @@ class ConnectedThread(QtCore.QThread):
         
     @QtCore.pyqtSlot()
     def stopNWait(self):
-        print QtCore.QThread.currentThreadId()
+        print "DEBUG ", QtCore.QThread.currentThreadId()
         mood = "SET PROFILE MOOD_TEXT Legge di Truman: Se non li puoi convincere, confondili."
-        print (mood)
-        flagMood = True
+        print "DEBUG mood ", mood
+        flagMood = False
         skype.Send(mood)
         
     def readyOK(self):
@@ -177,7 +190,7 @@ def startSkype():
         os.system("skype")        
 
 def mainProg():
-        global skype, remote_bus, out_connection
+        global song,flagMood,  skype, remote_bus, out_connection
         try:
             thread.start_new_thread( startSkype,() )
         except KeyboardInterrupt:
@@ -208,12 +221,15 @@ def mainProg():
          c.perform()
          song_time = rawsong.getvalue().split('\n')[0].split(',')[0]
          song = rawsong.getvalue().split('\n')[0].split(',')[1]
-         print (song)
+         print "DEBUG song ", song
          diff=now- int(song_time)
          if diff > 600:
-            message="SET PROFILE MOOD_TEXT Legge di Truman: Se non li puoi convincere, confondili. "+time.asctime( time.localtime(time.time()) )
-         else : message="SET PROFILE MOOD_TEXT (music)"+song[0:(len(song)-0)]+" on Last.fm--Multithread rel."
-         new_message=unicode(message,"UTF-8")
+            flagMood = False 
+            message = "SET PROFILE MOOD_TEXT Legge di Truman: Se non li puoi convincere, confondili. "+time.asctime( time.localtime(time.time()) )
+         else :
+            message = "SET PROFILE MOOD_TEXT (music)"+song[0:(len(song)-0)]+" on Last.fm--Multithread rel."
+            flagMood = True
+         new_message = unicode(message,"UTF-8")
          #if flagMood: new_message=mood
          try:
             skype.Send(new_message.encode())
