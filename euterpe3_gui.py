@@ -34,7 +34,7 @@ class EuterpeGui(QtGui.QMainWindow):
         self.button_layout = QtGui.QHBoxLayout()
         self.lineEdit = QtGui.QLineEdit(self)
         pic = QtGui.QLabel(self)
-        pic.setGeometry(300, 30, 80, 80)
+        pic.setGeometry(300, 10, 90, 90)
         pic.setPixmap(QtGui.QPixmap(os.getcwd() + "/web.png"))
         self.label = QtGui.QLabel(self)
         self.label2 = QtGui.QLabel(self)
