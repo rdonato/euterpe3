@@ -227,7 +227,7 @@ def mainProg():
             flagMood = False 
             message = "SET PROFILE MOOD_TEXT Legge di Truman: Se non li puoi convincere, confondili. "+time.asctime( time.localtime(time.time()) )
          else :
-            message = "SET PROFILE MOOD_TEXT (music)"+song[0:(len(song)-0)]+" on Last.fm--Multithread rel."
+            message = "SET PROFILE MOOD_TEXT (music)"+song[0:(len(song)-0)]+" http://code.google.com/p/euterpe3/"
             flagMood = True
          new_message = unicode(message,"UTF-8")
          #if flagMood: new_message=mood
